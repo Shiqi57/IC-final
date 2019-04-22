@@ -36,7 +36,7 @@ var scaling = "full"; // this will resize to fit inside the screen dimensions
 var color = dark;
 var outerColor = darker;
 var testText;
-var assets = ["person.png","field.jpg"];
+var assets = ["person.png","field.jpg","football.png"];
 var path = "assets/";
 //var view = app.getView();
 // as of ZIM 5.5.0 you do not need to put zim before ZIM functions and classes
@@ -80,6 +80,8 @@ frame.on("ready", function() {
 
 
     }).addTo(main);
+
+    var ball = frame.asset("football.png").siz(30).addTo(circle1).centerReg();
     
     circle1.on("mousedown", function(e) {
 		// get the difference between the mouse position and the circle position
@@ -123,7 +125,7 @@ frame.on("ready", function() {
 
     circle1.contact(function (obj, body) {
         if (obj == gate ) {
-    		var pane = new Container(stageW *0.7, 200).centerReg().addTo(main).outline();
+    		var pane = new Container(stageW *0.7, 200).centerReg().addTo(main);
             pane.sca(0);
             pane.animate({alpha:1, scale:1}, 700, null);
             var goal = new Label({
@@ -133,12 +135,16 @@ frame.on("ready", function() {
                 color:"white",
                 // rollColor:"red",
                 fontOptions:"italic bold"
-            }).centerReg().mov(0,-20).addTo(pane)
+            }).mov(30,-20).addTo(pane)
     		zog("win");
     	}
     	
     });
     
+
+
+
+
     var person1 = frame.asset("person.png").addTo(main);
     person1.siz(30).centerReg().loc(stageW/2,200).cur().addPhysics(false);
     
@@ -185,7 +191,10 @@ frame.on("ready", function() {
         // fontOptions:"italic bold"
     }).centerReg().mov(0,-20).addTo(wel)
     
+    var infoCon = new Container(stageW * 0.8, 200).addTo(page2).centerReg();
+    var recInfo = new Rectangle( stageW * 0.8, 200, blue,{borderColor: green, borderWidth:4, corner:20}).addTo(infoCon);
 
+    var text =  new Label({text:"This is a pinball game where you can drag the football to create a stretch between the ball and the origin piont, and release the handball will be ejected. When the ball hits the white gate at the top, the goal, it wins, but there are two randomly defenders in each game. However, unlike football, you can play the goal with the wall.", size:15, color:white, lineWidth: stageW * 0.7, lineHeight:20}).centerReg().addTo(infoCon);
     var start = new Button({
         label:"Start",
         width:stageW * 0.5,
