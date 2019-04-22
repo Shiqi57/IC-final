@@ -1,0 +1,306 @@
+
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>ZIM Physics</title>
+
+<!-- Welcome to ZIM at http://zimjs.com - Code Interactive Media Pizzazz!             -->
+<!-- ZIM runs on the HTML Canvas powered by JavaScript and CreateJS http://createjs.com -->
+<!-- Founded by Inventor Dan Zen - http://danzen.com - Canadian New Media Award Winner     -->
+<!-- ZIM is free to use. You can donate to help improve ZIM at http://zimjs.com/donate     -->
+
+<script src="https://d309knd7es5f10.cloudfront.net/createjs_1.1_min.js"></script>
+<script src="https://d309knd7es5f10.cloudfront.net/zim_10.0.1.js"></script>
+<!-- use zimjs.com/distill for minified individual functions! -->
+
+<!-- import Box2D and ZIM Physics helper -->
+<script src="https://d309knd7es5f10.cloudfront.net/Box2dWeb-2.1.a.3.min.js"></script>
+<script src="https://d309knd7es5f10.cloudfront.net/physics_2.0.js"></script>
+<script src="https://d309knd7es5f10.cloudfront.net/pizzazz_02.js"></script>
+<script src="https://zimjs.com/ten/header.js"></script>
+<!-- <script src="view.js"></script> -->
+
+<script>
+
+// SCALING OPTIONS
+// scaling can have values as follows with full being the default
+// "fit"    sets canvas and stage to dimensions and scales to fit inside window size
+// "outside"    sets canvas and stage to dimensions and scales to fit outside window size
+// "full"    sets stage to window size with no scaling
+// "tagID"    add canvas to HTML tag of ID - set to dimensions if provided - no scaling
+
+var scaling = "full"; // this will resize to fit inside the screen dimensions
+// var width = 524;
+// var height = 768;
+var color = dark;
+var outerColor = darker;
+var testText;
+var assets = ["person.png","field.jpg"];
+var path = "assets/";
+//var view = app.getView();
+// as of ZIM 5.5.0 you do not need to put zim before ZIM functions and classes
+var frame = new Frame(scaling, null, null, color, outerColor, assets, path);
+frame.on("ready", function() {
+    zog("ready from ZIM Frame"); // logs in console (F12 - choose console)
+
+    var stage = frame.stage;
+    var stageW = frame.width;
+    var stageH = frame.height;
+
+    var numPages = 3; // example Pages object made to use 3 pages
+	var pageList = [];
+	
+  
+    // See https://zimjs.com/docs.html?item=Physics
+    // See https://zimjs.com/docs.html?item=addPhysics
+
+    // new Physics(gravity, borders, scroll, frame)
+    // normall border is the stage - want to add balls above the stage so add a bit of room
+    var physics = new Physics(0);
+    var first = new Container(stageW,stageH);
+    var back = new Rectangle(stageW,stageH, green).centerReg().addTo(first);
+    var main = new Container(stageW,stageH);
+    var field = new Rectangle(stageW,stageH, green).centerReg().addTo(main);
+    var line1 = new Rectangle(stageW, 6, "white").centerReg().loc(stageW/2, stageH*0.75).addTo(main);
+    var dot = new Circle(5,white).centerReg().loc(stageW/2, stageH*0.75).addTo(main);
+    // var back = frame.asset('field.jpg').addTo();
+    // back.fit(null,null,stageW,stageH)
+    
+    
+    
+    var gate = new Rectangle(80, 15, "white").centerReg().loc(stageW/2, 0).addPhysics(false).addTo(main);
+
+    var circle1 = new Circle(15,blue).centerReg().loc(stageW/2, stageH*0.75).addTo().addPhysics({
+        shape:"circle",
+        linear:1,
+              friction:2,
+              angular:0,
+                 restitution:1
+
+
+    }).addTo(main);
+    
+    circle1.on("mousedown", function(e) {
+		// get the difference between the mouse position and the circle position
+		// factor it by a desired amount and apply a one time impulse force
+        zog("click");
+		var factor = 1;
+		
+		var cX = circle1.x;
+		var cY = circle1.y;
+        person2.loc(rand(20,stageW/2));
+        stage.update();
+        stage.on("stagemouseup", function(e) {
+            zog("re");
+        var mX = stage.mouseX;
+		var mY = stage.mouseY;
+        var sX = (cX-mX)*factor;
+		var sY = (cY-mY)*factor;
+        circle1.impulse(sX,sY);
+    })
+		// the vector needs to be applied at a position in the scale of the world
+		// so that could be new b2Vec2(cX/physics.scale, cY/physics.scale)
+		// but an easier way is to ask for the GetWorldCenter() which is in the world scale	
+	});
+    var i;
+    var rects = [];
+    // for (let i = 0; i < 3; i++) {
+    //     createP(rand(stageW),rand(0,stageW/2)); 
+        
+    // };
+
+    
+    circle1.contact(function (obj, body) {
+        if (obj == person1 || obj == person2 ) {
+            // var pane = new Container(stageW *0.7, 200).addTo();
+            // pane.sca(0);
+            // pane.animate({alpha:1, scale:1}, 700, null, done);
+    		zog("ops");
+    	}
+    	
+    });
+
+    circle1.contact(function (obj, body) {
+        if (obj == gate ) {
+    		var pane = new Container(stageW *0.7, 200).centerReg().addTo(main).outline();
+            pane.sca(0);
+            pane.animate({alpha:1, scale:1}, 700, null);
+            var goal = new Label({
+                text:"Goal!!!",
+                size:40,
+                font:"courier",
+                color:"white",
+                // rollColor:"red",
+                fontOptions:"italic bold"
+            }).centerReg().mov(0,-20).addTo(pane)
+    		zog("win");
+    	}
+    	
+    });
+    
+    var person1 = frame.asset("person.png").addTo(main);
+    person1.siz(30).centerReg().loc(stageW/2,200).cur().addPhysics(false);
+    
+    var person2 = frame.asset("person.png").clone().addTo(main);
+    person2.siz(30).centerReg().loc(rand(20, stageW -20),rand(100,stageH/2)).cur().addPhysics(false);
+    // zog(rand(20,stageW/2 - 20 && stageW/2 - 20, stageW ));
+    // zog(stageW);
+    // var person3 = frame.asset("person.png").clone();
+    // person3.siz(20).centerReg().loc(stageW/2,200).cur().addPhysics(false);
+
+    var page2 = new Container(stageW,stageH).addTo();
+    var rec2 = new Rectangle(stageW,stageH, pink).centerReg().addTo(page2);
+    var pages = new Pages({
+    //    holder:holder,
+        holder:stage,
+	   // 5. pass in the individual page objects with swipe instructions
+	   pages:[
+	      // swipe:["right", "left", "down", "up"]
+	      {page:first, swipe:[null,page2,null,main]},
+          {page:page2, swipe:[first,null,null,main]},
+          {page:main, swipe:[null,page2,first,null]},
+	    //   {page:page3, swipe:[page2,null,null,null]}
+	   ],
+	   // 6. add a transition and transition speed
+	   transition:"slide",
+	   speed:400
+    }).addTo();
+    
+    // var pane = new Pane({
+	// 	container:first,
+	// 	width:stageW/2, height:150,
+	// 	label:"Welcome",
+	// 	color:frame.light,
+	// 	corner:0
+	// }).show();
+
+    var wel = new Rectangle(stageW * 0.8, 150,blue).centerReg().addTo(first);
+    var label = new Label({
+        text:"Welcome",
+        size:40,
+        font:"courier",
+        color:"white"
+        // rollColor:"red",
+        // fontOptions:"italic bold"
+    }).centerReg().mov(0,-20).addTo(wel)
+    
+
+    var start = new Button({
+        label:"Start",
+        width:stageW * 0.5,
+        height:40,
+        backgroundColor:pink,
+        rollBackgroundColor:"MediumOrchid",
+        borderWidth:4,
+        borderColor:"violet",
+        
+        corner:2
+        }).centerReg().mov(0,150).addTo(first);
+    var start2 = new Button({
+        label:"Start",
+        width:stageW * 0.5,
+        height:40,
+        backgroundColor:pink,
+        rollBackgroundColor:"MediumOrchid",
+        borderWidth:4,
+        borderColor:"violet",
+        
+        corner:2
+        }).centerReg().mov(0,150).addTo(page2);
+
+    var info = new Button({
+		width:30,
+		height:30,
+		backgroundColor:blue,
+		rollBackgroundColor:pink,
+		corner:0,
+		label:"",
+		icon:pizzazz.makeIcon("info", "white").sca(.4) 
+    }).pos(stageW - 70, 30).addTo(first);
+    var info2 = new Button({
+		width:30,
+		height:30,
+		backgroundColor:blue,
+		rollBackgroundColor:pink,
+		corner:0,
+		label:"",
+		icon:pizzazz.makeIcon("info", "white").sca(.4) 
+    }).pos(30, stageH - 50).addTo(main);
+    var home = new Button({
+		width:30,
+		height:30,
+		backgroundColor:blue,
+		rollBackgroundColor:pink,
+		corner:0,
+		label:"",
+		icon:pizzazz.makeIcon("home", "white").sca(.4) 
+    }).pos(30, 30).addTo(page2);
+    var home2 = new Button({
+		width:30,
+		height:30,
+		backgroundColor:blue,
+		rollBackgroundColor:pink,
+		corner:0,
+		label:"",
+		icon:pizzazz.makeIcon("home", "white").sca(.4) 
+    }).pos(30, 30).addTo(main);
+
+    var hotSpots = new HotSpots([
+		// 9. pass in an array of pages, their interface objects and events to call
+		{page:first, rect:start, call:function(){pages.go(main, "down");}},
+		{page:first, rect:info, call:function(){pages.go(page2, "right");}},
+         {page:page2, rect:home, call:function(){pages.go(first, "left");}},
+         {page:page2, rect:start2, call:function(){pages.go(main, "down");}},
+         {page:main, rect:home2, call:function(){pages.go(first, "up");}},
+         {page:main, rect:info2, call:function(){pages.go(page2, "right");}}
+		// {page:page3, rect:page3.arrowL, call:function(){pages.go(page2, "left");}},
+	]);
+
+    function createP(x,y){
+    
+        
+        // person1 = frame.asset("person.png").clone();
+        // person1.siz(20).centerReg().loc(x,y).cur().addPhysics(false);
+    }
+    // if (rect.x == 0) {
+    // 		rect.color = red;
+    //         zog(rect.x);
+    //         zog("touch");
+    		
+    //         rect.removeFrom(stage);
+    // 			// circle.noContact(); // could only check once...
+    	
+    // 	}
+    
+
+
+    
+    physics.drag();
+
+    // interval({min:50, max:100}, function () {
+    //     balls.getChildAt(rand(balls.numChildren-1)).impulse(rand(50,100), rand(50,200))
+    // });
+
+    // HEADER / FOOTER
+    // if copying code - do not copy header and footer
+    
+
+    stage.update(); // this is needed to show any changes
+
+}); // end of ready
+
+</script>
+
+<meta name="viewport" content="width=device-width, user-scalable=no" />
+
+</head>
+
+<body>
+<!-- canvas with id="myCanvas" is made by zim Frame -->
+<script>
+var r=Math.round(Math.random()*1000000);
+document.write('<img src=/cgi-bin/traffic_plus?company=danzen&page=zimPhysicsMenu&r='+r+' width=1 height=1>');
+</script>
+</body>
+</html>
